@@ -75,9 +75,13 @@ only together.
      Every open from a Linux CIFS client also arrives as a real SMB open
      (share-all), and so does Wine's read-only share descriptor. Mirroring
      those would make each Wine open conflict with itself.
-   - **Open question:** how a mirrored client is recognised (an `smb.conf`
-     parameter naming the non-mirrored client addresses, or an account
-     group, or another attribute Samba can see at tree connect).
+   - **Which clients:** by account. A share parameter names a domain group,
+     `smbproxy_sharemode:wine group`. Sessions whose user is in it are the
+     Linux CIFS mounts that carry Wine's own bytes: they are never mirrored.
+     Every other session is. Membership is read at tree connect, from the
+     session's token. One mount account per container, all in the group,
+     follows the containers wherever they mount from (decided 2026-10-19).
+     A share without the parameter mirrors nothing and only checks.
 3. **Identity.** The checks and locks use the same file identity as
    `smbproxy-session-vfs`'s per-tree mounts, which Samba's `fileid` module
    normalises (`fileid:algorithm = fsname`). The order in `vfs objects`
